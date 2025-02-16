@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Excel 解析器</title>
+    <script>
+        function uploadFile() {
+            let formData = new FormData();
+            let fileInput = document.getElementById("file");
+            if (fileInput.files.length === 0) {
+                alert("請選擇檔案！");
+                return;
+            }
+
+            formData.append("file", fileInput.files[0]);
+
+            fetch("/upload", { method: "POST", body: formData })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        alert("錯誤：" + data.error);
+                        return;
+                    }
+                    displayTable(data.columns, data.data);
+                })
+                .catch(error => console.error("錯誤:", error));
+        }
+
+        function displayTable(columns, data) {
+            let table = "<table border='1'><tr>";
+            columns.forEach(col => table += `<th>${col}</th>`);
+            table += "</tr>";
+
+            data.forEach(row => {
+                table += "<tr>";
+                columns.forEach(col => table += `<td>${row[col] || ''}</td>`);
+                table += "</tr>";
+            });
+
+            table += "</table>";
+            document.getElementById("output").innerHTML = table;
+        }
+    </script>
+</head>
+<body>
+    <h2>上傳 Excel 並顯示表格</h2>
+    <input type="file" id="file">
+    <button onclick="uploadFile()">上傳</button>
+    <div id="output"></div>
+</body>
+</html>
